@@ -1,0 +1,92 @@
+import java.util.Scanner;
+
+public class Main {
+    private static final char[] PLAYERS = {'X', 'O'};
+    private char[][] board = new char[3][3];
+    private int currentPlayer = 0; // Index in the PLAYERS array
+
+    public Main() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                board[i][j] = '-';
+            }
+        }
+    }
+
+    public void playGame() {
+        Scanner scanner = new Scanner(System.in);
+        boolean gameEnded = false;
+        while (!gameEnded) {
+            printBoard();
+            boolean validInput = false;
+            while (!validInput) {
+                System.out.println("Player " + PLAYERS[currentPlayer] + ", enter row and column (1-3):");
+                int row = scanner.nextInt() - 1;
+                int col = scanner.nextInt() - 1;
+                validInput = makeMove(row, col);
+                if (!validInput) {
+                    System.out.println("Invalid move, try again.");
+                }
+            }
+            gameEnded = isGameEnded();
+            currentPlayer = (currentPlayer + 1) % 2;
+        }
+        printBoard();
+        if (currentPlayer == 0) { // Since currentPlayer was updated after the last move
+            System.out.println("Player O wins!");
+        } else {
+            System.out.println("Player X wins!");
+        }
+        scanner.close();
+    }
+
+    private void printBoard() {
+        for (char[] row : board) {
+            for (char cell : row) {
+                System.out.print(cell + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    private boolean makeMove(int row, int col) {
+        if (row < 0 || col < 0 || row >= 3 || col >= 3 || board[row][col] != '-') {
+            return false;
+        }
+        board[row][col] = PLAYERS[currentPlayer];
+        return true;
+    }
+
+    private boolean isGameEnded() {
+        // Check rows, columns, and diagonals
+        for (int i = 0; i < 3; i++) {
+            if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != '-') {
+                return true;
+            }
+            if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != '-') {
+                return true;
+            }
+        }
+        if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != '-') {
+            return true;
+        }
+        if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != '-') {
+            return true;
+        }
+        // Check for draw
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] == '-') {
+                    return false; // Continue playing
+                }
+            }
+        }
+        System.out.println("It's a draw!");
+        return true;
+    }
+
+    public static void main(String[] args) {
+        Main game = new Main();
+        game.playGame();
+    }
+}

@@ -1,0 +1,186 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+
+    public static void main(String[] args) {
+        // Define the problem parameters
+        int numMissionaries = 3;
+        int numCannibals = 3;
+
+        // Create the CSP solver
+        MissionariesAndCannibalsCSP csp = new MissionariesAndCannibalsCSP(numMissionaries, numCannibals);
+
+        // Solve the problem
+        List<State> solution = csp.solve();
+
+        // Print the solution
+        if (solution != null) {
+            System.out.println("Solution found:");
+            for (State state : solution) {
+                System.out.println(state);
+            }
+        } else {
+            System.out.println("No solution found.");
+        }
+    }
+}
+
+class State {
+    int missionariesLeft;
+    int cannibalsLeft;
+    int missionariesRight;
+    int cannibalsRight;
+    boolean boatOnLeft;
+
+    public State(int missionariesLeft, int cannibalsLeft, int missionariesRight, int cannibalsRight, boolean boatOnLeft) {
+        this.missionariesLeft = missionariesLeft;
+        this.cannibalsLeft = cannibalsLeft;
+        this.missionariesRight = missionariesRight;
+        this.cannibalsRight = cannibalsRight;
+        this.boatOnLeft = boatOnLeft;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ML:%d CL:%d MR:%d CR:%d Boat:%s",
+                missionariesLeft, cannibalsLeft, missionariesRight, cannibalsRight, boatOnLeft ? "Left" : "Right");
+    }
+}
+
+class MissionariesAndCannibalsCSP {
+
+    private int numMissionaries;
+    private int numCannibals;
+
+    public MissionariesAndCannibalsCSP(int numMissionaries, int numCannibals) {
+        this.numMissionaries = numMissionaries;
+        this.numCannibals = numCannibals;
+    }
+
+    public List<State> solve() {
+        List<State> path = new ArrayList<>();
+        State initialState = new State(numMissionaries, numCannibals, 0, 0, true);
+        if (solveHelper(initialState, path)) {
+            return path;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean solveHelper(State currentState, List<State> path) {
+        if (isGoalState(currentState)) {
+            path.add(currentState);
+            return true;
+        }
+
+        path.add(currentState);
+
+        // Try all possible moves
+        for (State nextState : getPossibleMoves(currentState)) {
+            if (!path.contains(nextState) && isValidState(nextState)) {
+                if (solveHelper(nextState, path)) {
+                    return true;
+                }
+            }
+        }
+
+        // If no valid move is found, backtrack
+        path.remove(path.size() - 1);
+        return false;
+    }
+
+    private boolean isGoalState(State state) {
+        return state.missionariesLeft == 0 && state.cannibalsLeft == 0 && state.boatOnLeft == false;
+    }
+
+    private List<State> getPossibleMoves(State currentState) {
+        List<State> possibleMoves = new ArrayList<>();
+
+        // Possible moves from left to right
+        possibleMoves.add(new State(
+                currentState.missionariesLeft - 2,
+                currentState.cannibalsLeft,
+                currentState.missionariesRight + 2,
+                currentState.cannibalsRight,
+                false
+        ));
+        possibleMoves.add(new State(
+                currentState.missionariesLeft,
+                currentState.cannibalsLeft - 2,
+                currentState.missionariesRight,
+                currentState.cannibalsRight + 2,
+                false
+        ));
+        possibleMoves.add(new State(
+                currentState.missionariesLeft - 1,
+                currentState.cannibalsLeft - 1,
+                currentState.missionariesRight + 1,
+                currentState.cannibalsRight + 1,
+                false
+        ));
+        possibleMoves.add(new State(
+                currentState.missionariesLeft - 1,
+                currentState.cannibalsLeft,
+                currentState.missionariesRight + 1,
+                currentState.cannibalsRight,
+                false
+        ));
+        possibleMoves.add(new State(
+                currentState.missionariesLeft,
+                currentState.cannibalsLeft - 1,
+                currentState.missionariesRight,
+                currentState.cannibalsRight + 1,
+                false
+        ));
+
+        // Possible moves from right to left
+        possibleMoves.add(new State(
+                currentState.missionariesLeft + 2,
+                currentState.cannibalsLeft,
+                currentState.missionariesRight - 2,
+                currentState.cannibalsRight,
+                true
+        ));
+        possibleMoves.add(new State(
+                currentState.missionariesLeft,
+                currentState.cannibalsLeft + 2,
+                currentState.missionariesRight,
+                currentState.cannibalsRight - 2,
+                true
+        ));
+        possibleMoves.add(new State(
+                currentState.missionariesLeft + 1,
+                currentState.cannibalsLeft + 1,
+                currentState.missionariesRight - 1,
+                currentState.cannibalsRight - 1,
+                true
+        ));
+        possibleMoves.add(new State(
+                currentState.missionariesLeft + 1,
+                currentState.cannibalsLeft,
+                currentState.missionariesRight - 1,
+                currentState.cannibalsRight,
+                true
+        ));
+        possibleMoves.add(new State(
+                currentState.missionariesLeft,
+                currentState.cannibalsLeft + 1,
+                currentState.missionariesRight,
+                currentState.cannibalsRight - 1,
+                true
+        ));
+
+        return possibleMoves;
+    }
+
+    private boolean isValidState(State state) {
+        // Check if the state violates any rules
+        return state.missionariesLeft >= 0 &&
+                state.cannibalsLeft >= 0 &&
+                state.missionariesRight >= 0 &&
+                state.cannibalsRight >= 0 &&
+                (state.missionariesLeft == 0 || state.missionariesLeft >= state.cannibalsLeft) &&
+                (state.missionariesRight == 0 || state.missionariesRight >= state.cannibalsRight);
+    }
+}

@@ -1,0 +1,117 @@
+import java.util.*;
+
+class Cell {
+    int row, col;
+
+    public Cell(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+}
+
+class Pathnode implements Comparable<Pathnode> {
+    Cell cell;
+    int g; // Cost from start to current cell
+    int h; // Estimated cost from current cell to goal
+    Pathnode parent;
+
+    public Pathnode(Cell cell) {
+        this.cell = cell;
+    }
+
+    @Override
+    public int compareTo(Pathnode other) {
+        return Integer.compare(this.g + this.h, other.g + other.h);
+    }
+}
+
+public class RobotNavigationAStar {
+    static int[][] grid = {
+            {0, 0, 1, 0, 0},
+            {0, 1, 0, 0, 0},
+            {0, 0, 0, 1, 0},
+            {0, 1, 1, 0, 0},
+            {0, 0, 0, 0, 0}
+    };
+
+    static int[][] directions = {
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}
+    };
+
+    public static boolean isValid(Cell cell) {
+        int row = cell.row;
+        int col = cell.col;
+        return row >= 0 && row < grid.length && col >= 0 && col < grid[0].length && grid[row][col] == 0;
+    }
+
+    public static int heuristic(Cell cell, Cell goal) {
+        return Math.abs(cell.row - goal.row) + Math.abs(cell.col - goal.col);
+    }
+
+    public static List<Cell> findPath(Cell start, Cell goal) {
+        PriorityQueue<Pathnode> openSet = new PriorityQueue<>();
+        Set<Cell> closedSet = new HashSet<>();
+
+        Pathnode startNode = new Pathnode(start);
+        startNode.g = 0;
+        startNode.h = heuristic(start, goal);
+        openSet.add(startNode);
+
+        while (!openSet.isEmpty()) {
+            Pathnode current = openSet.poll();
+
+            if (current.cell.row == goal.row && current.cell.col == goal.col) {
+                // Reconstruct the path
+                List<Cell> path = new ArrayList<>();
+                while (current != null) {
+                    path.add(current.cell);
+                    current = current.parent;
+                }
+                Collections.reverse(path);
+                return path;
+            }
+
+            closedSet.add(current.cell);
+
+            for (int[] dir : directions) {
+                int newRow = current.cell.row + dir[0];
+                int newCol = current.cell.col + dir[1];
+                Cell neighbor = new Cell(newRow, newCol);
+
+                if (!isValid(neighbor) || closedSet.contains(neighbor)) {
+                    continue;
+                }
+
+                Pathnode neighborNode = new Pathnode(neighbor);
+                neighborNode.g = current.g + 1;
+                neighborNode.h = heuristic(neighbor, goal);
+                neighborNode.parent = current;
+
+                if (!openSet.contains(neighborNode)) {
+                    openSet.add(neighborNode);
+                } else if (neighborNode.g < current.g) {
+                    current.parent = neighborNode;
+                    current.g = neighborNode.g;
+                }
+            }
+        }
+
+        return Collections.emptyList(); // No path found
+    }
+
+    public static void main(String[] args) {
+        Cell start = new Cell(0, 0);
+        Cell goal = new Cell(4, 4);
+
+        List<Cell> path = findPath(start, goal);
+
+        if (path.isEmpty()) {
+            System.out.println("No path found.");
+        } else {
+            System.out.println("Path:");
+            for (Cell cell : path) {
+                System.out.println("(" + cell.row + ", " + cell.col + ")");
+            }
+        }
+    }
+}

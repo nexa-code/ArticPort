@@ -1,0 +1,123 @@
+import java.util.*;
+
+class State {
+    int missionariesLeft;
+    int cannibalsLeft;
+    int missionariesRight;
+    int cannibalsRight;
+    boolean boatOnLeft;
+
+    public State(int missionariesLeft, int cannibalsLeft, int missionariesRight, int cannibalsRight, boolean boatOnLeft) {
+        this.missionariesLeft = missionariesLeft;
+        this.cannibalsLeft = cannibalsLeft;
+        this.missionariesRight = missionariesRight;
+        this.cannibalsRight = cannibalsRight;
+        this.boatOnLeft = boatOnLeft;
+    }
+
+    public boolean isValid() {
+        if (missionariesLeft < 0 || cannibalsLeft < 0 || missionariesRight < 0 || cannibalsRight < 0 ||
+                (missionariesLeft > 0 && cannibalsLeft > missionariesLeft) ||
+                (missionariesRight > 0 && cannibalsRight > missionariesRight)) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isGoal() {
+        return missionariesLeft == 0 && cannibalsLeft == 0;
+    }
+
+    public State move(int missionaries, int cannibals) {
+        if (boatOnLeft) {
+            return new State(missionariesLeft - missionaries, cannibalsLeft - cannibals,
+                    missionariesRight + missionaries, cannibalsRight + cannibals,
+                    false);
+        } else {
+            return new State(missionariesLeft + missionaries, cannibalsLeft + cannibals,
+                    missionariesRight - missionaries, cannibalsRight - cannibals,
+                    true);
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        State state = (State) obj;
+        return missionariesLeft == state.missionariesLeft &&
+                cannibalsLeft == state.cannibalsLeft &&
+                missionariesRight == state.missionariesRight &&
+                cannibalsRight == state.cannibalsRight &&
+                boatOnLeft == state.boatOnLeft;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(missionariesLeft, cannibalsLeft, missionariesRight, cannibalsRight, boatOnLeft);
+    }
+
+    @Override
+    public String toString() {
+        String boatSide = boatOnLeft ? "L" : "R";
+        return missionariesLeft + "M" + cannibalsLeft + "C " + boatSide + "  " +
+                missionariesRight + "M" + cannibalsRight + "C";
+    }
+}
+
+public class Main {
+    public static boolean dfs(State currentState, Set<State> visited, List<State> path) {
+        visited.add(currentState);
+        path.add(currentState);
+
+        if (currentState.isGoal()) {
+            return true;
+        }
+
+        for (int missionaries = 0; missionaries <= 2; missionaries++) {
+            for (int cannibals = 0; cannibals <= 2; cannibals++) {
+                if (missionaries + cannibals > 0 && missionaries + cannibals <= 2) {
+                    State newState = currentState.move(missionaries, cannibals);
+                    if (newState.isValid() && !visited.contains(newState)) {
+                        if (dfs(newState, visited, path)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        path.remove(path.size() - 1);
+        return false;
+    }
+
+    public static void printSteps(List<State> path) {
+        for (int i = 0; i < path.size() - 1; i++) {
+            State from = path.get(i);
+            State to = path.get(i + 1);
+
+            int missionariesMoved = Math.abs(to.missionariesLeft - from.missionariesLeft);
+            int cannibalsMoved = Math.abs(to.cannibalsLeft - from.cannibalsLeft);
+
+            String action = from.boatOnLeft ? "L" : "R";
+            System.out.println(missionariesMoved + "M" + cannibalsMoved + "C " + action);
+        }
+    }
+
+    public static void main(String[] args) {
+        State initialState = new State(3, 3, 0, 0, true);
+        Set<State> visited = new HashSet<>();
+        List<State> path = new ArrayList<>();
+
+        if (dfs(initialState, visited, path)) {
+            System.out.println("Solution found!");
+            for (State state : path) {
+                System.out.println(state);
+            }
+            System.out.println("Steps:");
+            printSteps(path);
+        } else {
+            System.out.println("No solution found.");
+        }
+    }
+}

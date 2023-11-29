@@ -1,0 +1,128 @@
+import java.util.*;
+
+public class Main {
+
+    // Define the map with distances between cities
+    private static Map<String, Map<String, Integer>> romaniaMap = new HashMap<>();
+
+    // Heuristic values (straight-line distances to the goal)
+    private static Map<String, Integer> heuristicValues = new HashMap<>();
+
+    public static void main(String[] args) {
+        // Initialize the map
+        initializeMap();
+
+        // Set heuristic values
+        initializeHeuristicValues();
+
+        // Find the shortest path using A* algorithm
+        List<String> path = aStarSearch("Arad", "Bucharest");
+
+        // Display the result
+        if (path != null) {
+            System.out.println("Shortest Path: " + path);
+        } else {
+            System.out.println("No path found.");
+        }
+    }
+
+    private static List<String> aStarSearch(String start, String goal) {
+        Set<String> explored = new HashSet<>();
+        PriorityQueue<Node> priorityQueue = new PriorityQueue<>(Comparator.comparingInt(node -> node.cost));
+
+        priorityQueue.add(new Node(start, null, 0, heuristicValues.get(start)));
+
+        while (!priorityQueue.isEmpty()) {
+            Node currentNode = priorityQueue.poll();
+            explored.add(currentNode.city);
+
+            if (currentNode.city.equals(goal)) {
+                // Goal reached, reconstruct and return the path
+                List<String> path = new ArrayList<>();
+                while (currentNode != null) {
+                    path.add(currentNode.city);
+                    currentNode = currentNode.parent;
+                }
+                Collections.reverse(path);
+                return path;
+            }
+
+            for (Map.Entry<String, Integer> neighborEntry : romaniaMap.get(currentNode.city).entrySet()) {
+                String neighbor = neighborEntry.getKey();
+                int costToNeighbor = neighborEntry.getValue();
+
+                if (!explored.contains(neighbor)) {
+                    int totalCost = currentNode.cost + costToNeighbor;
+                    int heuristic = heuristicValues.get(neighbor);
+                    int estimatedTotalCost = totalCost + heuristic;
+
+                    Node neighborNode = new Node(neighbor, currentNode, totalCost, estimatedTotalCost);
+                    priorityQueue.add(neighborNode);
+                }
+            }
+        }
+
+        // No path found
+        return null;
+    }
+
+    private static void initializeMap() {
+        romaniaMap.put("Arad", Map.of("Zerind", 75, "Timisoara", 118, "Sibiu", 140));
+        romaniaMap.put("Zerind", Map.of("Arad", 75, "Oradea", 71));
+        romaniaMap.put("Oradea", Map.of("Zerind", 71, "Sibiu", 151));
+        romaniaMap.put("Timisoara", Map.of("Arad", 118, "Lugoj", 111));
+        romaniaMap.put("Lugoj", Map.of("Timisoara", 111, "Mehadia", 70));
+        romaniaMap.put("Mehadia", Map.of("Lugoj", 70, "Drobeta", 75));
+        romaniaMap.put("Drobeta", Map.of("Mehadia", 75, "Craiova", 120));
+        romaniaMap.put("Craiova", Map.of("Drobeta", 120, "Rimnicu Vilcea", 146, "Pitesti", 138));
+        romaniaMap.put("Rimnicu Vilcea", Map.of("Craiova", 146, "Pitesti", 97, "Sibiu", 80));
+        romaniaMap.put("Sibiu", Map.of("Arad", 140, "Oradea", 151, "Rimnicu Vilcea", 80, "Fagaras", 99));
+        romaniaMap.put("Fagaras", Map.of("Sibiu", 99, "Bucharest", 211));
+        romaniaMap.put("Pitesti", Map.of("Rimnicu Vilcea", 97, "Craiova", 138, "Bucharest", 101));
+        romaniaMap.put("Bucharest", Map.of("Fagaras", 211, "Pitesti", 101, "Giurgiu", 90, "Urziceni", 85));
+        romaniaMap.put("Giurgiu", Map.of("Bucharest", 90));
+        romaniaMap.put("Urziceni", Map.of("Bucharest", 85, "Hirsova", 98, "Vaslui", 142));
+        romaniaMap.put("Hirsova", Map.of("Urziceni", 98, "Eforie", 86));
+        romaniaMap.put("Eforie", Map.of("Hirsova", 86));
+        romaniaMap.put("Vaslui", Map.of("Urziceni", 142, "Iasi", 92));
+        romaniaMap.put("Iasi", Map.of("Vaslui", 92, "Neamt", 87));
+        romaniaMap.put("Neamt", Map.of("Iasi", 87));
+    }
+
+    private static void initializeHeuristicValues() {
+        heuristicValues.put("Arad", 366);
+        heuristicValues.put("Zerind", 374);
+        heuristicValues.put("Oradea", 380);
+        heuristicValues.put("Timisoara", 329);
+        heuristicValues.put("Lugoj", 244);
+        heuristicValues.put("Mehadia", 241);
+        heuristicValues.put("Drobeta", 242);
+        heuristicValues.put("Craiova", 160);
+        heuristicValues.put("Rimnicu Vilcea", 193);
+        heuristicValues.put("Sibiu", 253);
+        heuristicValues.put("Fagaras", 176);
+        heuristicValues.put("Pitesti", 100);
+        heuristicValues.put("Bucharest", 0);
+        heuristicValues.put("Giurgiu", 77);
+        heuristicValues.put("Urziceni", 80);
+        heuristicValues.put("Hirsova", 151);
+        heuristicValues.put("Eforie", 161);
+        heuristicValues.put("Vaslui", 199);
+        heuristicValues.put("Iasi", 226);
+        heuristicValues.put("Neamt", 234);
+    }
+
+    static class Node {
+        String city;
+        Node parent;
+        int cost; // g(n): cost from the start node to the current node
+        int estimatedTotalCost; // f(n): g(n) + h(n), where h(n) is the heuristic
+
+        Node(String city, Node parent, int cost, int estimatedTotalCost) {
+            this.city = city;
+            this.parent = parent;
+            this.cost = cost;
+            this.estimatedTotalCost = estimatedTotalCost;
+        }
+    }
+}

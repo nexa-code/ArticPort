@@ -1,0 +1,92 @@
+import java.util.*;
+
+class Item {
+    int weight;
+    int value;
+
+    public Item(int weight, int value) {
+        this.weight = weight;
+        this.value = value;
+    }
+}
+
+class Node implements Comparable<Node> {
+    int level, value, weight;
+    double bound;
+
+    public Node(int level, int value, int weight) {
+        this.level = level;
+        this.value = value;
+        this.weight = weight;
+    }
+
+    public int compareTo(Node other) {
+        return Double.compare(other.bound, this.bound);
+    }
+}
+
+public class Main {
+    static int knapsack(int capacity, Item[] items, int n) {
+        Arrays.sort(items, (a, b) -> Double.compare((double) b.value / b.weight, (double) a.value / a.weight));
+
+        PriorityQueue<Node> queue = new PriorityQueue<>();
+        Node u = null, v = null;
+        u = new Node(-1, 0, 0);
+        queue.add(u);
+        int maxVal = 0;
+
+        while (!queue.isEmpty()) {
+            u = queue.poll();
+            if (u.level == -1)
+                v = new Node(0, 0, 0);
+            else if (u.level == n - 1)
+                continue;
+            else
+                v = new Node(u.level + 1, u.value + items[v.level].value, u.weight + items[v.level].weight);
+
+            if (v.weight <= capacity && v.value > maxVal)
+                maxVal = v.value;
+
+            v.bound = calculateBound(v, capacity, items, n);
+
+            if (v.bound > maxVal)
+                queue.add(v);
+
+            v = new Node(u.level + 1, u.value, u.weight);
+            v.bound = calculateBound(v, capacity, items, n);
+
+            if (v.bound > maxVal)
+                queue.add(v);
+        }
+        return maxVal;
+    }
+
+    static double calculateBound(Node u, int capacity, Item[] items, int n) {
+        if (u.weight >= capacity)
+            return 0;
+
+        double bound = u.value;
+        int j = u.level + 1;
+        int totalWeight = u.weight;
+
+        while (j < n && totalWeight + items[j].weight <= capacity) {
+            bound += items[j].value;
+            totalWeight += items[j].weight;
+            j++;
+        }
+
+        if (j < n)
+            bound += (capacity - totalWeight) * ((double) items[j].value / items[j].weight);
+
+        return bound;
+    }
+
+    public static void main(String args[]) {
+        int capacity = 50;
+        Item[] items = {new Item(10, 60), new Item(20, 100), new Item(30, 120)};
+        int n = items.length;
+
+        int maxVal = knapsack(capacity, items, n);
+        System.out.println("Maximum value in knapsack = " + maxVal);
+    }
+}

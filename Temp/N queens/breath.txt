@@ -1,0 +1,70 @@
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class Main {
+
+    static class State {
+        int[] queens;
+        int row;
+
+        public State(int[] queens, int row) {
+            this.queens = queens;
+            this.row = row;
+        }
+    }
+
+    public static boolean isSafe(int[] queens, int row, int col) {
+        for (int i = 0; i < row; i++) {
+            if (queens[i] == col || queens[i] - i == col - row || queens[i] + i == col + row) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void printBoard(int[] queens) {
+        int n = queens.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (queens[i] == j) {
+                    System.out.print("Q ");
+                } else {
+                    System.out.print(". ");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    public static void solveNQueens(int n) {
+        int[] queens = new int[n];
+        Queue<State> queue = new LinkedList<>();
+
+        queue.add(new State(queens, 0));
+
+        while (!queue.isEmpty()) {
+            State currentState = queue.poll();
+
+            int currentRow = currentState.row;
+            if (currentRow == n) {
+                // Found a solution
+                printBoard(currentState.queens);
+                continue;
+            }
+
+            for (int col = 0; col < n; col++) {
+                if (isSafe(currentState.queens, currentRow, col)) {
+                    int[] newQueens = currentState.queens.clone();
+                    newQueens[currentRow] = col;
+                    queue.add(new State(newQueens, currentRow + 1));
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        int n = 8; // Change the value of n to the desired board size
+        solveNQueens(n);
+    }
+}

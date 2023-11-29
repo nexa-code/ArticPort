@@ -1,0 +1,67 @@
+import java.util.LinkedList;
+import java.util.Queue;
+
+class KnapsackNode {
+    int weight;
+    int value;
+    int level;
+
+    public KnapsackNode(int weight, int value, int level) {
+        this.weight = weight;
+        this.value = value;
+        this.level = level;
+    }
+}
+
+public class Main {
+    public static int knapsackBFS(int[] weights, int[] values, int capacity) {
+        int n = weights.length;
+
+        Queue<KnapsackNode> queue = new LinkedList<>();
+        queue.add(new KnapsackNode(0, 0, 0));
+
+        int maxValue = 0;
+
+        while (!queue.isEmpty()) {
+            KnapsackNode currentNode = queue.poll();
+
+            int currentWeight = currentNode.weight;
+            int currentValue = currentNode.value;
+            int currentLevel = currentNode.level;
+
+            if (currentLevel == n) {
+                if (currentValue > maxValue) {
+                    maxValue = currentValue;
+                }
+                continue;
+            }
+
+            // Include the current item
+            if (currentWeight + weights[currentLevel] <= capacity) {
+                queue.add(new KnapsackNode(
+                        currentWeight + weights[currentLevel],
+                        currentValue + values[currentLevel],
+                        currentLevel + 1
+                ));
+            }
+
+            // Exclude the current item
+            queue.add(new KnapsackNode(
+                    currentWeight,
+                    currentValue,
+                    currentLevel + 1
+            ));
+        }
+
+        return maxValue;
+    }
+
+    public static void main(String[] args) {
+        int[] weights = {2, 3, 4, 5};
+        int[] values = {3, 4, 5, 6};
+        int capacity = 5;
+
+        int result = knapsackBFS(weights, values, capacity);
+        System.out.println("Maximum value in knapsack: " + result);
+    }
+}

@@ -1,0 +1,48 @@
+import java.util.Arrays;
+
+public class Main {
+
+    static class Item {
+        int weight;
+        int value;
+
+        Item(int weight, int value) {
+            this.weight = weight;
+            this.value = value;
+        }
+    }
+
+    private static int knapsackDFS(Item[] items, int capacity, int currentIndex) {
+        // Base case: if we have considered all items or the capacity is exhausted
+        if (currentIndex == items.length || capacity == 0) {
+            return 0;
+        }
+
+        // If the weight of the current item exceeds the remaining capacity, skip it
+        if (items[currentIndex].weight > capacity) {
+            return knapsackDFS(items, capacity, currentIndex + 1);
+        }
+
+        // Include the current item or exclude it and move to the next item
+        int include = items[currentIndex].value + knapsackDFS(items, capacity - items[currentIndex].weight, currentIndex + 1);
+        int exclude = knapsackDFS(items, capacity, currentIndex + 1);
+
+        // Return the maximum of including or excluding the current item
+        return Math.max(include, exclude);
+    }
+
+    public static void main(String[] args) {
+        Item[] items = {
+                new Item(2, 10),
+                new Item(5, 30),
+                new Item(8, 40),
+                new Item(2, 5)
+        };
+
+        int capacity = 10;
+
+        int maxValue = knapsackDFS(items, capacity, 0);
+
+        System.out.println("Maximum value that can be obtained: " + maxValue);
+    }
+}

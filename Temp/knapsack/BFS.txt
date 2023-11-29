@@ -1,0 +1,120 @@
+import java.util.*;
+
+class Item {
+    int weight;
+    int value;
+    double ratio;
+
+    public Item(int weight, int value) {
+        this.weight = weight;
+        this.value = value;
+        this.ratio = (double) value / weight;
+    }
+}
+
+class KnapsackNode implements Comparable<KnapsackNode> {
+    int level;
+    int profit;
+    int weight;
+    double bound;
+
+    public KnapsackNode(int level, int profit, int weight, double bound) {
+        this.level = level;
+        this.profit = profit;
+        this.weight = weight;
+        this.bound = bound;
+    }
+
+    @Override
+    public int compareTo(KnapsackNode other) {
+        return Double.compare(other.bound, this.bound);
+    }
+}
+
+public class Main {
+    public static int knapsack(int capacity, int[] weights, int[] values) {
+        int n = weights.length;
+        Item[] items = new Item[n];
+
+        for (int i = 0; i < n; i++) {
+            items[i] = new Item(weights[i], values[i]);
+        }
+
+        Arrays.sort(items, Comparator.comparingDouble(item -> item.ratio));
+
+        PriorityQueue<KnapsackNode> priorityQueue = new PriorityQueue<>();
+
+        int maxProfit = 0;
+
+        KnapsackNode rootNode = new KnapsackNode(-1, 0, 0, 0);
+        rootNode.bound = bound(rootNode, capacity, items, n);
+        priorityQueue.add(rootNode);
+
+        while (!priorityQueue.isEmpty()) {
+            KnapsackNode currentNode = priorityQueue.poll();
+
+            if (currentNode.bound > maxProfit) {
+                int level = currentNode.level + 1;
+
+                // Include the item
+                KnapsackNode includeNode = new KnapsackNode(level,
+                        currentNode.profit + items[level].value,
+                        currentNode.weight + items[level].weight,
+                        0);
+                includeNode.bound = bound(includeNode, capacity, items, n);
+
+                // Exclude the item
+                KnapsackNode excludeNode = new KnapsackNode(level,
+                        currentNode.profit,
+                        currentNode.weight,
+                        0);
+                excludeNode.bound = bound(excludeNode, capacity, items, n);
+
+                if (includeNode.weight <= capacity && includeNode.profit > maxProfit) {
+                    maxProfit = includeNode.profit;
+                }
+
+                if (includeNode.bound > maxProfit) {
+                    priorityQueue.add(includeNode);
+                }
+
+                if (excludeNode.bound > maxProfit) {
+                    priorityQueue.add(excludeNode);
+                }
+            }
+        }
+
+        return maxProfit;
+    }
+
+    private static double bound(KnapsackNode node, int capacity, Item[] items, int n) {
+        if (node.weight >= capacity) {
+            return 0;
+        }
+
+        double bound = node.profit;
+        int currentWeight = node.weight;
+        int level = node.level + 1;
+
+        while (level < n && currentWeight + items[level].weight <= capacity) {
+            bound += items[level].value;
+            currentWeight += items[level].weight;
+            level++;
+        }
+
+        if (level < n) {
+            bound += (capacity - currentWeight) * items[level].ratio;
+        }
+
+        return bound;
+    }
+
+    public static void main(String[] args) {
+        int[] values = {60, 100, 120};
+        int[] weights = {10, 20, 30};
+        int capacity = 50;
+
+        int maxValue = knapsack(capacity, weights, values);
+        System.out.println("Maximum value in Knapsack = " + maxValue);
+    }
+}

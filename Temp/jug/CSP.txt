@@ -1,0 +1,44 @@
+public class Main {
+
+    public static void main(String[] args) {
+        int jug1Capacity = 4;
+        int jug2Capacity = 3;
+        int targetAmount = 2;
+
+        solveWaterJugProblem(jug1Capacity, jug2Capacity, targetAmount);
+    }
+
+    private static void solveWaterJugProblem(int jug1Capacity, int jug2Capacity, int targetAmount) {
+        for (int jug1 = 0; jug1 <= jug1Capacity; jug1++) {
+            for (int jug2 = 0; jug2 <= jug2Capacity; jug2++) {
+                if (jug1 + jug2 == targetAmount) {
+                    System.out.println("Solution found: Jug1 = " + jug1 + ", Jug2 = " + jug2);
+                    printSteps(jug1, jug2, targetAmount);
+                    return;
+                }
+            }
+        }
+
+        System.out.println("No solution found for target amount: " + targetAmount);
+    }
+
+    private static void printSteps(int jug1, int jug2, int targetAmount) {
+        int currentAmount = 0;
+        while (currentAmount != targetAmount) {
+            if (jug1 > 0 && currentAmount + jug1 <= targetAmount) {
+                currentAmount += jug1;
+                System.out.println("Step: Fill Jug1");
+            } else if (jug2 > 0 && currentAmount + jug2 <= targetAmount) {
+                currentAmount += jug2;
+                System.out.println("Step: Fill Jug2");
+            } else if (jug1 > 0) {
+                currentAmount -= jug1;
+                System.out.println("Step: Empty Jug1");
+            } else if (jug2 > 0) {
+                currentAmount -= jug2;
+                System.out.println("Step: Empty Jug2");
+            }
+            System.out.println("Current Amount: " + currentAmount);
+        }
+    }
+}

@@ -1,0 +1,54 @@
+public class Main {
+
+    public static void main(String[] args) {
+        int n = 8; // You can change the value of 'n' to solve for different board sizes
+        solveNQueens(n);
+    }
+
+    public static void solveNQueens(int n) {
+        int[] board = new int[n];
+        placeQueens(board, 0, n);
+    }
+
+    private static void placeQueens(int[] board, int row, int n) {
+        if (row == n) {
+            printSolution(board);
+            return;
+        }
+
+        for (int col = 0; col < n; col++) {
+            if (isSafe(board, row, col)) {
+                board[row] = col;
+                placeQueens(board, row + 1, n);
+            }
+        }
+    }
+
+    private static boolean isSafe(int[] board, int row, int col) {
+        for (int i = 0; i < row; i++) {
+            // Check if the queen can be placed in the current column
+            // without conflicting with already placed queens
+            if (board[i] == col ||            // Same column
+                    board[i] - i == col - row ||  // Same diagonal (left to right)
+                    board[i] + i == col + row) {  // Same diagonal (right to left)
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void printSolution(int[] board) {
+        int n = board.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i] == j) {
+                    System.out.print("Q ");
+                } else {
+                    System.out.print(". ");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+}

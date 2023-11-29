@@ -1,0 +1,106 @@
+import java.util.*;
+
+public class Main {
+
+    static class Node {
+        int row, col, g, h, f;
+        Node parent;
+        List<Node> children;
+
+        Node(int row, int col) {
+            this.row = row;
+            this.col = col;
+            this.children = new ArrayList<>();
+        }
+    }
+
+    static int[][] grid = {
+            {0, 0, 0, 0, 0},
+            {0, 1, 1, 0, 0},
+            {0, 0, 0, 1, 0},
+            {0, 0, 1, 1, 0},
+            {0, 0, 0, 0, 0}
+    };
+
+    static int startRow = 0, startCol = 0;
+    static int goalRow = 4, goalCol = 4;
+
+    public static void main(String[] args) {
+        Node root = new Node(startRow, startCol);
+        List<Node> path = aoStarSearch(root);
+        if (path != null) {
+            System.out.println("Shortest Path:");
+            for (Node node : path) {
+                System.out.println("(" + node.row + ", " + node.col + ")");
+            }
+        } else {
+            System.out.println("No path found.");
+        }
+    }
+
+    private static List<Node> aoStarSearch(Node root) {
+        PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingInt(node -> node.f));
+        Set<Node> closedSet = new HashSet<>();
+
+        openSet.add(root);
+
+        while (!openSet.isEmpty()) {
+            Node current = openSet.poll();
+
+            if (current.row == goalRow && current.col == goalCol) {
+                // Goal reached, reconstruct and return the path
+                List<Node> path = new ArrayList<>();
+                while (current != null) {
+                    path.add(current);
+                    current = current.parent;
+                }
+                Collections.reverse(path);
+                return path;
+            }
+
+            closedSet.add(current);
+
+            for (Node child : generateChildren(current)) {
+                if (!closedSet.contains(child)) {
+                    if (!openSet.contains(child) || child.g < current.g) {
+                        child.parent = current;
+                        child.g = current.g;
+                        child.h = calculateHeuristic(child);
+                        child.f = child.g + child.h;
+                        openSet.add(child);
+                    }
+                }
+            }
+        }
+
+        // No path found
+        return null;
+    }
+
+    private static List<Node> generateChildren(Node node) {
+        List<Node> children = new ArrayList<>();
+
+        // Add possible movements (up, down, left, right)
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int[] dir : directions) {
+            int newRow = node.row + dir[0];
+            int newCol = node.col + dir[1];
+
+            if (isValid(newRow, newCol)) {
+                Node child = new Node(newRow, newCol);
+                children.add(child);
+            }
+        }
+
+        return children;
+    }
+
+    private static boolean isValid(int row, int col) {
+        return row >= 0 && row < grid.length && col >= 0 && col < grid[0].length && grid[row][col] == 0;
+    }
+
+    private static int calculateHeuristic(Node node) {
+        // A simple Manhattan distance heuristic
+        return Math.abs(node.row - goalRow) + Math.abs(node.col - goalCol);
+    }
+}

@@ -1,0 +1,69 @@
+public class CryptarithmeticCSP {
+
+    public static void main(String[] args) {
+        solveCryptarithmetic();
+    }
+
+    private static void solveCryptarithmetic() {
+        // Variables
+        int b, a, s, e, l, m, o, r, g;
+
+        // Domains (digits 0 to 9)
+        for (b = 0; b <= 9; b++) {
+            for (a = 0; a <= 9; a++) {
+                for (s = 0; s <= 9; s++) {
+                    for (e = 0; e <= 9; e++) {
+                        for (l = 0; l <= 9; l++) {
+                            for (m = 0; m <= 9; m++) {
+                                for (o = 0; o <= 9; o++) {
+                                    for (r = 0; r <= 9; r++) {
+                                        for (g = 0; g <= 9; g++) {
+                                            // Ensure different digits
+                                            if (areAllDigitsDifferent(b, a, s, e, l, m, o, r, g)) {
+                                                // Check if the equation is satisfied
+                                                if (baseBallGames(b, a, s, e, l, m, o, r, g)) {
+                                                    System.out.println("Solution found:");
+                                                    System.out.println("  B A S E");
+                                                    System.out.println("+ B A L L");
+                                                    System.out.println("---------");
+                                                    System.out.println("G A M E S");
+                                                    System.out.println("---------");
+                                                    System.out.println("  " + b + " " + a + " " + s + " " + e);
+                                                    System.out.println("+ " + b + " " + a + " " + l + " " + l);
+                                                    System.out.println("---------");
+                                                    System.out.println("  " + g + " " + a + " " + m + " " + e + " " + s);
+                                                    return; // Stop after finding the first solution
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        System.out.println("No solution found.");
+    }
+
+    private static boolean areAllDigitsDifferent(int... digits) {
+        for (int i = 0; i < digits.length; i++) {
+            for (int j = i + 1; j < digits.length; j++) {
+                if (digits[i] == digits[j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean baseBallGames(int b, int a, int s, int e, int l, int m, int o, int r, int g) {
+        int base = b * 1000 + a * 100 + s * 10 + e;
+        int ball = b * 1000 + a * 100 + l * 10 + l;
+        int games = g * 10000 + a * 1000 + m * 100 + e * 10 + s;
+
+        return (base + ball == games);
+    }
+}

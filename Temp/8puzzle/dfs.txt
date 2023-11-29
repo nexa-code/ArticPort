@@ -1,0 +1,119 @@
+import java.util.;
+
+class PuzzleState {
+    int[][] board;
+    int zeroRow, zeroCol;
+
+    public PuzzleState(int[][] board) {
+        this.board = new int[3][3];
+        for (int i = 0; i  3; i++) {
+            for (int j = 0; j  3; j++) {
+                this.board[i][j] = board[i][j];
+                if (board[i][j] == 0) {
+                    zeroRow = i;
+                    zeroCol = j;
+                }
+            }
+        }
+    }
+
+    public boolean isGoal() {
+        int value = 1;
+        for (int i = 0; i  3; i++) {
+            for (int j = 0; j  3; j++) {
+                if (board[i][j] != value % 9) {
+                    return false;
+                }
+                value++;
+            }
+        }
+        return true;
+    }
+
+    public ListPuzzleState getNeighbors() {
+        ListPuzzleState neighbors = new ArrayList();
+        int[] dr = {-1, 0, 1, 0};
+        int[] dc = {0, 1, 0, -1};
+
+        for (int i = 0; i  4; i++) {
+            int newRow = zeroRow + dr[i];
+            int newCol = zeroCol + dc[i];
+
+            if (newRow = 0 && newRow  3 && newCol = 0 && newCol  3) {
+                int[][] newBoard = new int[3][3];
+                for (int j = 0; j  3; j++) {
+                    newBoard[j] = Arrays.copyOf(board[j], 3);
+                }
+
+                 Swap the empty space with the neighboring tile
+                newBoard[zeroRow][zeroCol] = newBoard[newRow][newCol];
+                newBoard[newRow][newCol] = 0;
+
+                PuzzleState neighbor = new PuzzleState(newBoard);
+                neighbors.add(neighbor);
+            }
+        }
+        return neighbors;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null  getClass() != obj.getClass()) return false;
+        PuzzleState that = (PuzzleState) obj;
+        return Arrays.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        int[][] initialBoard = {
+                {1, 2, 3},
+                {4, 0, 5},
+                {6, 7, 8}
+        };
+
+        PuzzleState initialState = new PuzzleState(initialBoard);
+        dfs(initialState, 15);  Set depth limit as needed
+    }
+
+    public static void dfs(PuzzleState currentState, int depthLimit) {
+        SetPuzzleState visited = new HashSet();
+        dfsRecursive(currentState, visited, depthLimit, 0);
+    }
+
+    private static void dfsRecursive(PuzzleState currentState, SetPuzzleState visited, int depthLimit, int currentDepth) {
+        System.out.println(Current State);
+        printBoard(currentState.board);
+
+        if (currentState.isGoal()) {
+            System.out.println(Goal State Reached!);
+            return;
+        }
+
+        if (currentDepth  depthLimit) {
+            visited.add(currentState);
+            ListPuzzleState neighbors = currentState.getNeighbors();
+            for (PuzzleState neighbor  neighbors) {
+                if (!visited.contains(neighbor)) {
+                    dfsRecursive(neighbor, visited, depthLimit, currentDepth + 1);
+                }
+            }
+        }
+    }
+
+    public static void printBoard(int[][] board) {
+        for (int i = 0; i  3; i++) {
+            for (int j = 0; j  3; j++) {
+                System.out.print(board[i][j] +  );
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+}

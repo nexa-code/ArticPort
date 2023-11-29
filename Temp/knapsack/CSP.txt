@@ -1,0 +1,44 @@
+public class Main {
+
+    static class KnapsackProblem {
+        int[] weights;
+        int[] values;
+        int capacity;
+
+        public KnapsackProblem(int[] weights, int[] values, int capacity) {
+            this.weights = weights;
+            this.values = values;
+            this.capacity = capacity;
+        }
+    }
+
+    public static void main(String[] args) {
+        int[] weights = {2, 3, 4, 5};
+        int[] values = {3, 4, 5, 6};
+        int capacity = 5;
+
+        KnapsackProblem knapsack = new KnapsackProblem(weights, values, capacity);
+        int[] solution = solveKnapsack(knapsack);
+
+        System.out.println("Selected items (1 for selected, 0 for not selected):");
+        for (int item : solution) {
+            System.out.print(item + " ");
+        }
+    }
+
+    private static int[] solveKnapsack(KnapsackProblem knapsack) {
+        int n = knapsack.weights.length;
+        int[] selectedItems = new int[n];
+
+        // Constraint Satisfaction Problem solving logic
+        for (int i = 0; i < n; i++) {
+            // If adding the item doesn't exceed the capacity, select it
+            if (knapsack.weights[i] <= knapsack.capacity) {
+                selectedItems[i] = 1;
+                knapsack.capacity -= knapsack.weights[i];
+            }
+        }
+
+        return selectedItems;
+    }
+}
